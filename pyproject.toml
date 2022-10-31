@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "gcstui"
+version = "0.1.0"
+description = "Terminal User interface for exploring, downloading and uploading files to Google Cloud Storage buckets"
+authors = ["Matheus Fillipe <matheusfillipeag@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+google-cloud-storage = "^2.5.0"
+pytermgui = "^7.2.0"
+diskcache = "^5.4.0"
+PyYAML = "^6.0"
+blessed = "^1.19.1"
+pyfzf = "^0.3.1"
+tqdm = "^4.64.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
