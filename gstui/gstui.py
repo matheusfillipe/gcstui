@@ -1,7 +1,7 @@
 # List buckets in GCS
 
-from typing import List
 from pathlib import Path
+from typing import List
 
 from diskcache import Cache
 from google.cloud import storage
@@ -46,21 +46,28 @@ class CachedClient(storage.Client):
 storage_client = CachedClient()
 
 
-def list_buckets():
-    buckets = storage_client.list_buckets()
+def mainloop():
     fzf = FzfPrompt()
-    bucket_name = fzf.prompt(buckets)[0]
-    if bucket_name:
-        blobs = storage_client.list_blobs(bucket_name)
-        blob_name = fzf.prompt(blobs)[0]
-        if blob_name:
-            bucket = storage_client.bucket(bucket_name)
-            blob = bucket.blob(blob_name)
-            destination_file_name = Path(blob_name).name
-            with open(destination_file_name, "wb") as f:
-                with tqdm.wrapattr(f, "write", total=blob.size) as file_obj:
-                    storage_client.download_blob_to_file(blob, file_obj)
-            print(f"Downloaded {blob_name}")
+    buckets = storage_client.list_buckets()
+    bucket_name = None
+    while True:
+        try:
+            if bucket_name is None:
+                bucket_name = fzf.prompt(buckets)[0]
+            else:
+                blobs = storage_client.list_blobs(bucket_name)
+                blob_name = fzf.prompt(blobs)[0]
+                if blob_name:
+                    bucket = storage_client.bucket(bucket_name)
+                    blob = bucket.blob(blob_name)
+                    destination_file_name = Path(blob_name).name
+                    if blob.size is not None:
+                        print(f"Downloading {blob.size/1024/1024:.2f} MB")
+                    with open(destination_file_name, "wb") as f:
+                        with tqdm.wrapattr(f, "write", total=blob.size) \
+                                as file_obj:
+                            storage_client.download_blob_to_file(
+                                blob, file_obj)
+                    print(f"Downloaded {blob_name}")
+        except KeyboardInterrupt:
             return
-
-    print("No blob selected")

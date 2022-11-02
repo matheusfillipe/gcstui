@@ -1,4 +1,4 @@
-from .gstui import list_buckets
+from .gstui import mainloop
 
 def main():
-    list_buckets()
+    mainloop()
