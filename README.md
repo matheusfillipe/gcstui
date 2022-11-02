@@ -4,6 +4,14 @@
 
 A Text User Interface for exploring Google Cloud Storage. Fast and cached.
 
+## Intallation
+
+Clone this repo and run `pip install .`
+
+## Usage
+
+Run `gstui` or `gstui -h` to see more options.
+
 # Related Projects
 
 * [gsutil](https://github.com/GoogleCloudPlatform/gsutil) A command line tool for interacting with cloud storage services. 

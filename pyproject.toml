@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "gcstui"
+name = "gstui"
 version = "0.1.0"
 description = "Terminal User interface for exploring, downloading and uploading files to Google Cloud Storage buckets"
 authors = ["Matheus Fillipe <matheusfillipeag@gmail.com>"]
@@ -16,6 +16,8 @@ blessed = "^1.19.1"
 pyfzf = "^0.3.1"
 tqdm = "^4.64.1"
 
+[tool.poetry.scripts]
+gstui = "gstui.main:main"
 
 [build-system]
 requires = ["poetry-core"]
