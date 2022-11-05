@@ -107,5 +107,4 @@ def test_cache_usage(mock_super, cached_client: CachedClient):
 
 def test_get_cache_path():
     path = Path(get_cache_path()).expanduser()
-    assert path.exists()
     assert path.is_dir()
