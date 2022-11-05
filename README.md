@@ -6,7 +6,9 @@ A Text User Interface for exploring Google Cloud Storage. Fast and cached.
 
 ## Intallation
 
-Clone this repo and run `pip install .`
+```sh
+pip install -U gstui
+```
 
 ## Usage
 
