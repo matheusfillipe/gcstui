@@ -35,6 +35,7 @@ poetry run pytest tests -n 4 -vvv
 
 ## TODO
 
+- [ ] Better thread management
 - [ ] Don't rely on `time.sleep` for cache tests
 - [ ] [urwid](https://github.com/urwid/urwid) UI
 

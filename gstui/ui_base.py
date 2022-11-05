@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from pathlib import Path
 from dataclasses import dataclass
 from queue import LifoQueue
 from typing import List, Optional
@@ -76,6 +77,6 @@ class FzfUI(UIBase):
                     for blob_name in blob_names:
                         bucket = storage_client.bucket(bucket_name)
                         blob = bucket.blob(blob_name)
-                        storage_client.download(blob, blob_name)
+                        storage_client.download(blob, Path(blob_name).name)
             except KeyboardInterrupt:
                 return
