@@ -7,7 +7,10 @@ from diskcache import Cache
 from google.cloud import storage
 from tqdm.std import tqdm
 
-GsClient = storage.Client
+
+class GsClient(storage.Client):
+    def download(self, *_):
+        pass
 
 
 def get_cache_path() -> str:
@@ -30,9 +33,8 @@ class ThreadedCachedClient:
     def spawn(self, cls, *args, **kwargs):
         # spawn init in thread
         self.init_thread = Thread(
-            target=cls.__init__,
-            args=(self, *args),
-            kwargs=kwargs)
+            target=cls.__init__, args=(self, *args), kwargs=kwargs
+        )
         self.init_thread.start()
 
     @classmethod
@@ -68,7 +70,9 @@ class CachedClient(GsClient, ThreadedCachedClient):
 
     @ThreadedCachedClient.diskcache
     def list_buckets(self, *args, **kwargs) -> List[str]:
-        return [bucket.name for bucket in super().list_buckets(*args, **kwargs)]
+        return [
+            bucket.name for
+            bucket in super().list_buckets(*args, **kwargs)]
 
     @ThreadedCachedClient.diskcache
     def list_blobs(self, *args, **kwargs) -> List[str]:

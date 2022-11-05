@@ -43,9 +43,11 @@ class ListMenu:
             with term.cbreak():
                 while selection_inprogress:
                     key = term.inkey()
-                    if key.name in ["KEY_TAB", "KEY_DOWN"] or str(key).lower() == "j":
+                    if key.name in ["KEY_TAB", "KEY_DOWN"] or \
+                            str(key).lower() == "j":
                         selection += 1
-                    if key.name in ["KEY_BTAB", "KEY_UP"] or str(key).lower() == "k":
+                    if key.name in ["KEY_BTAB", "KEY_UP"] or \
+                            str(key).lower() == "k":
                         selection -= 1
                     if key.name == "KEY_ENTER":
                         selection_inprogress = False
@@ -58,5 +60,11 @@ class ListMenu:
 
 
 if __name__ == "__main__":
-    menu = ListMenu([MenuOption(t, action=None) for t in ["login to system", "create account", "disconnect", "check it out"]])
+    menu = ListMenu(
+        [
+            MenuOption(t, action=None)
+            for t in
+            ["login to system", "create account", "disconnect", "check it out"]
+        ]
+    )
     menu.show()

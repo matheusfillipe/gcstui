@@ -18,9 +18,21 @@ Be free to submit a PR. Check the formatting with flake8 and for new features tr
 
 ## Tests
 
+
+```sh
+poetry run tests
+```
+
+Or manually
+
 ```sh
 poetry run pytest tests -n 4 -vvv
 ```
+
+## TODO
+
+- [ ] Don't rely on `time.sleep` for cache tests
+- [ ] [urwid](https://github.com/urwid/urwid) UI
 
 # Related Projects
 

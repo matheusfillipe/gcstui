@@ -1,8 +1,6 @@
 import time
-from tempfile import TemporaryDirectory
 from time import sleep
 
-import pytest
 from gstui.gsclient import ThreadedCachedClient
 
 CACHE_KEYS = [(1,), ("no", "cache"), (1, 2, "args")]
@@ -11,12 +9,6 @@ CACHE_MAP = {
     CACHE_KEYS[1]: ["d", "e", "f"],
     CACHE_KEYS[2]: ["g", "h", "i", 3],
 }
-
-
-@pytest.fixture(scope='session')
-def cache_path():
-    with TemporaryDirectory() as tmpdir:
-        yield tmpdir
 
 
 class MockSlowClass:

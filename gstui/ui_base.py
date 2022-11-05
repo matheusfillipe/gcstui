@@ -1,10 +1,12 @@
 from abc import abstractmethod
+from dataclasses import dataclass
 from queue import LifoQueue
 from typing import List, Optional
-from dataclasses import dataclass
 
 from pyfzf.pyfzf import FzfPrompt
-from gstui.gsclient import GsClient
+
+from gstui.gsclient import CachedClient
+
 
 @dataclass
 class View:
@@ -43,8 +45,8 @@ class UIBase:
 class FzfUI(UIBase):
     """Default UI"""
 
-    def __init__(self):
-        self.fzf = FzfPrompt()
+    def __init__(self, fzf: FzfPrompt = FzfPrompt()):
+        self.fzf = fzf
         super().__init__()
 
     def list_view(self, view: View) -> List[str]:
@@ -53,20 +55,21 @@ class FzfUI(UIBase):
         multi = view.multi
         return self.fzf.prompt(items, f"{'--multi ' * multi}--prompt={title}")
 
-    def mainloop(self, storage_client: GsClient):
+    def mainloop(self, storage_client: CachedClient):
         buckets = storage_client.list_buckets()
         bucket_name = None
         while True:
             try:
                 if bucket_name is None:
                     view = View(buckets, "Bucket: ")
-                    bucket_name = uistack.push(view)[0]
+                    bucket_name = self.push(view)[0]
                 else:
                     blobs = storage_client.list_blobs(bucket_name)
-                    blob_name = uistack.push(View(blobs, "blob", True))
-                    if blob_name:
+                    blob_names = self.push(View(blobs, "blob", True))
+                    self.pop()
+                    for blob_name in blob_names:
                         bucket = storage_client.bucket(bucket_name)
                         blob = bucket.blob(blob_name)
-                        download(blob, blob_name)
+                        storage_client.download(blob, blob_name)
             except KeyboardInterrupt:
                 return
