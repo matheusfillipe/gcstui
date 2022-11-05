@@ -1,7 +1,10 @@
 import time
+from dataclasses import dataclass
+from pathlib import Path
 from time import sleep
+from unittest.mock import patch
 
-from gstui.gsclient import ThreadedCachedClient
+from gstui.gsclient import CachedClient, ThreadedCachedClient, get_cache_path
 
 CACHE_KEYS = [(1,), ("no", "cache"), (1, 2, "args")]
 CACHE_MAP = {
@@ -72,8 +75,37 @@ def assert_caching(method, *args):
     total = time.time() - start
     assert total < 0.1
 
+
 def test_caching(cache_path: str):
     ThreadedCachedClient.cache_path = cache_path
     assert_caching("cache1", *CACHE_KEYS[0])
     assert_caching("cache2", *CACHE_KEYS[1])
     assert_caching("cache3", *CACHE_KEYS[2])
+
+
+@dataclass
+class MockBlob:
+    name: str
+    size: int = 1024
+
+
+@patch("gstui.gsclient.super")
+def test_cache_usage(mock_super, cached_client: CachedClient):
+    mock_super().list_buckets.return_value = [
+        MockBlob(name) for name in ["a", "b", "c"]
+    ]
+    mock_super().list_blobs.return_value = [
+        MockBlob(name) for name in ["d", "e", "f"]]
+    cached_client.cache_all()
+    path = (Path(cached_client.cache_path) / "cache.db").expanduser()
+
+    assert path.exists()
+    assert path.stat().st_size > 0
+
+    cached_client.clear_cache()
+    assert not path.exists()
+
+def test_get_cache_path():
+    path = Path(get_cache_path()).expanduser()
+    assert path.exists()
+    assert path.is_dir()

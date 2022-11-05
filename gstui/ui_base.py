@@ -27,7 +27,7 @@ class UIBase:
         pass
 
     @abstractmethod
-    def mainloop(self):
+    def mainloop(self, client: CachedClient):
         """Main loop"""
         pass
 

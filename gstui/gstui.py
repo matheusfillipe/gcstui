@@ -16,7 +16,7 @@ def main(interface, clean, cache_path, cache_all):
     storage_client = CachedClient()
     storage_client.cache_path = cache_path
     if clean:
-        storage_client.clean_cache()
+        storage_client.clear_cache()
         return
     if cache_all:
         storage_client.cache_all()

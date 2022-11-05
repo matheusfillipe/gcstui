@@ -1,6 +1,6 @@
 import os
-from shutil import rmtree
 from pathlib import Path
+from shutil import rmtree
 from threading import Thread
 from typing import List
 
@@ -17,8 +17,16 @@ class GsClient(storage.Client):
 def get_cache_path() -> str:
     """Get cache path in different OS's"""
     if os.name == "nt":
-        path = Path(os.getenv("LOCALAPPDATA")) / "gstui" / "cache"
-    path = Path.home() / ".cache" / "gstui"
+        path = os.getenv("LOCALAPPDATA")
+        if path is None:
+            path = os.getenv("APPDATA")
+        if path is None:
+            print("Cannot find cache path")
+            exit(1)
+            return
+        path = Path(path) / "gstui" / "cache"
+    else:
+        path = Path.home() / ".cache" / "gstui"
     return str(path)
 
 
@@ -29,6 +37,7 @@ class ThreadedCachedClient:
     """
 
     init_thread: Thread
+    thread_pool: List[Thread]
     cache_path: str = get_cache_path()
 
     def spawn(self, cls, *args, **kwargs):
@@ -37,11 +46,27 @@ class ThreadedCachedClient:
             target=cls.__init__, args=(self, *args), kwargs=kwargs
         )
         self.init_thread.start()
+        self.thread_pool = []
 
-    def clean_cache(self):
+    def clear_cache(self):
         """Clean cache"""
         print("Cleaning cache database...")
         rmtree(Path(self.cache_path).expanduser(), ignore_errors=True)
+
+    def _thread_pool_cleanup(self):
+        """Cleanup thread pool"""
+        for thread in self.thread_pool:
+            if not thread.is_alive():
+                self.thread_pool.remove(thread)
+
+    def close(self):
+        """Stop all threads"""
+        self._thread_pool_cleanup()
+        print("Stopping all threads...")
+        if self.init_thread.is_alive():
+            self.init_thread.join()
+        for thread in self.thread_pool:
+            thread.join()
 
     @classmethod
     def diskcache(cls, func):
@@ -49,7 +74,8 @@ class ThreadedCachedClient:
 
         def wrapper(self, *args, **kwargs):
             if not isinstance(self, ThreadedCachedClient):
-                raise TypeError("Decorator only works with ThreadedCachedClient")
+                raise TypeError(
+                    "Decorator only works with ThreadedCachedClient")
             cache = Cache(cls.cache_path)
             key = func.__name__ + ":" + str(args) + str(kwargs)
             result = cache.get(key)
@@ -60,7 +86,12 @@ class ThreadedCachedClient:
                 result = func(self, *args, **kwargs)
                 cache.set(key, result)
             elif not self.init_thread.is_alive():
-                Thread(target=func, args=(self, *args), kwargs=kwargs).start()
+                new_thread = Thread(target=func, args=(
+                    self, *args), kwargs=kwargs)
+                self.thread_pool.append(new_thread)
+                new_thread.start()
+                self._thread_pool_cleanup()
+
             return result
 
         return wrapper
@@ -75,11 +106,13 @@ class CachedClient(GsClient, ThreadedCachedClient):
 
     def close(self):
         super().close()
-        self.init_thread.join()
+        ThreadedCachedClient.close(self)
 
     @ThreadedCachedClient.diskcache
     def list_buckets(self, *args, **kwargs) -> List[str]:
-        return [bucket.name for bucket in super().list_buckets(*args, **kwargs)]
+        return [
+            bucket.name for bucket in super().list_buckets(*args, **kwargs)
+        ]
 
     @ThreadedCachedClient.diskcache
     def list_blobs(self, *args, **kwargs) -> List[str]:
@@ -92,12 +125,11 @@ class CachedClient(GsClient, ThreadedCachedClient):
         for bucket in tqdm(buckets):
             self.list_blobs(bucket)
 
-    # TODO this should be responsability of the UI instead
-    def download(self, blob, blob_name):
-        destination_file_name = Path(blob_name).name
+    # TODO part of this should be responsability of the UI instead
+    def download(self, blob: storage.Blob, destination_file_name: str):
         if blob.size is not None:
             print(f"Downloading {blob.size/1024/1024:.2f} MB")
         with open(destination_file_name, "wb") as f:
             with tqdm.wrapattr(f, "write", total=blob.size) as file_obj:
                 self.download_blob_to_file(blob, file_obj)
-        print(f"Downloaded {blob_name}")
+        print(f"Downloaded {Path(destination_file_name).name}")
