@@ -127,6 +127,7 @@ class CachedClient(GsClient, ThreadedCachedClient):
 
     # TODO part of this should be responsability of the UI instead
     def download(self, blob: storage.Blob, destination_file_name: str):
+        destination_file_name = Path(destination_file_name).name
         if blob.size is not None:
             print(f"Downloading {blob.size/1024/1024:.2f} MB")
         with open(destination_file_name, "wb") as f:
