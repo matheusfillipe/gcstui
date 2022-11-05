@@ -52,4 +52,4 @@ jobs:
         uses: JRubics/poetry-publish@v1.13
         with:
           user: mattfly
-          password: ${{ secrets.pypi_password }}
+          pypi_token: ${{ secrets.PYPI_TOKEN }}
