@@ -25,6 +25,7 @@ tests = "scripts:test"
 pytest = "^7.2.0"
 pytest-xdist = "^3.0.2"
 pytest-cov = "^4.0.0"
+flake8 = "^5.0.4"
 
 [build-system]
 requires = ["poetry-core"]

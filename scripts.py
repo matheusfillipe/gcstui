@@ -12,4 +12,4 @@ def test():
     for cmd in COMMANDS:
         if run_shell_command(cmd) != 0:
             print("Failed to run command: {}".format(cmd))
-            return
+            exit(1)
