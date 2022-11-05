@@ -5,10 +5,11 @@ from time import sleep
 import pytest
 from gstui.gsclient import ThreadedCachedClient
 
+CACHE_KEYS = [(1,), ("no", "cache"), (1, 2, "args")]
 CACHE_MAP = {
-    (1,): ["a", "b", "c"],
-    ("no", "args"): ["d", "e", "f"],
-    (1, "no", "args"): ["g", "h", "i", 3],
+    CACHE_KEYS[0]: ["a", "b", "c"],
+    CACHE_KEYS[1]: ["d", "e", "f"],
+    CACHE_KEYS[2]: ["g", "h", "i", 3],
 }
 
 
@@ -37,7 +38,7 @@ class MockClient(MockSlowClass, ThreadedCachedClient):
     @ThreadedCachedClient.diskcache
     def cache1(self, a1):
         sleep(0.1)
-        return CACHE_MAP[(a1)]
+        return CACHE_MAP[(a1,)]
 
     @ThreadedCachedClient.diskcache
     def cache2(self, a1, a2):
@@ -79,6 +80,8 @@ def assert_caching(method, *args):
     total = time.time() - start
     assert total < 0.1
 
-# def test_caching(cache_path: str):
-#     ThreadedCachedClient.cache_path = cache_path
-#     assert_caching("cache1", 1)
+def test_caching(cache_path: str):
+    ThreadedCachedClient.cache_path = cache_path
+    assert_caching("cache1", *CACHE_KEYS[0])
+    assert_caching("cache2", *CACHE_KEYS[1])
+    assert_caching("cache3", *CACHE_KEYS[2])
