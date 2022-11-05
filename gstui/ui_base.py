@@ -53,7 +53,8 @@ class FzfUI(UIBase):
         items = view.items
         title = view.title
         multi = view.multi
-        return self.fzf.prompt(items, f"{'--multi ' * multi}--prompt={title}")
+        return self.fzf.prompt(items,
+                               f"{'--multi ' * multi}--prompt='{title}'")
 
     def mainloop(self, storage_client: CachedClient):
         buckets = storage_client.list_buckets()
@@ -62,10 +63,15 @@ class FzfUI(UIBase):
             try:
                 if bucket_name is None:
                     view = View(buckets, "Bucket: ")
-                    bucket_name = self.push(view)[0]
+                    bucket_name = self.push(view)
+                    if not bucket_name:
+                        break
+                    bucket_name = bucket_name[0]
                 else:
                     blobs = storage_client.list_blobs(bucket_name)
-                    blob_names = self.push(View(blobs, "blob", True))
+                    blob_names = self.push(View(blobs, "Blob: ", True))
+                    if not blob_names:
+                        break
                     self.pop()
                     for blob_name in blob_names:
                         bucket = storage_client.bucket(bucket_name)

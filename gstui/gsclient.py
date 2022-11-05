@@ -1,4 +1,5 @@
 import os
+from shutil import rmtree
 from pathlib import Path
 from threading import Thread
 from typing import List
@@ -28,7 +29,7 @@ class ThreadedCachedClient:
     """
 
     init_thread: Thread
-    cache_path = get_cache_path()
+    cache_path: str = get_cache_path()
 
     def spawn(self, cls, *args, **kwargs):
         # spawn init in thread
@@ -37,14 +38,18 @@ class ThreadedCachedClient:
         )
         self.init_thread.start()
 
+    def clean_cache(self):
+        """Clean cache"""
+        print("Cleaning cache database...")
+        rmtree(Path(self.cache_path).expanduser(), ignore_errors=True)
+
     @classmethod
     def diskcache(cls, func):
         """Decorator to cache function results to disk"""
 
         def wrapper(self, *args, **kwargs):
             if not isinstance(self, ThreadedCachedClient):
-                raise TypeError(
-                    "Decorator only works with ThreadedCachedClient")
+                raise TypeError("Decorator only works with ThreadedCachedClient")
             cache = Cache(cls.cache_path)
             key = func.__name__ + ":" + str(args) + str(kwargs)
             result = cache.get(key)
@@ -54,8 +59,7 @@ class ThreadedCachedClient:
                     self.init_thread.join()
                 result = func(self, *args, **kwargs)
                 cache.set(key, result)
-            else:
-                # Warm up cache in thread
+            elif not self.init_thread.is_alive():
                 Thread(target=func, args=(self, *args), kwargs=kwargs).start()
             return result
 
@@ -66,17 +70,27 @@ class CachedClient(GsClient, ThreadedCachedClient):
     """Google cloud storage ThreadedCachedClient"""
 
     def __init__(self, *args, **kwargs):
+        super().__init__()
         self.spawn(GsClient, *args, **kwargs)
+
+    def close(self):
+        super().close()
+        self.init_thread.join()
 
     @ThreadedCachedClient.diskcache
     def list_buckets(self, *args, **kwargs) -> List[str]:
-        return [
-            bucket.name for
-            bucket in super().list_buckets(*args, **kwargs)]
+        return [bucket.name for bucket in super().list_buckets(*args, **kwargs)]
 
     @ThreadedCachedClient.diskcache
     def list_blobs(self, *args, **kwargs) -> List[str]:
         return [blob.name for blob in super().list_blobs(*args, **kwargs)]
+
+    def cache_all(self):
+        """Cache all tree structure"""
+        print("Caching all tree structure. This might take a while...")
+        buckets = self.list_buckets()
+        for bucket in tqdm(buckets):
+            self.list_blobs(bucket)
 
     # TODO this should be responsability of the UI instead
     def download(self, blob, blob_name):

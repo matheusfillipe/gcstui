@@ -10,7 +10,9 @@ Clone this repo and run `pip install .`
 
 ## Usage
 
-Run `gstui` or `gstui -h` to see more options.
+Run `gstui` or `gstui --help` to see more options.
+
+Loading buckets or the inital listing for the first time can take a long time to cache. You can create an initial cache of everything with: `gstui -a`.
 
 # Development
 
