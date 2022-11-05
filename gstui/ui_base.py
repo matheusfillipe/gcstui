@@ -72,7 +72,10 @@ class FzfUI(UIBase):
                     blobs = storage_client.list_blobs(bucket_name)
                     blob_names = self.push(View(blobs, "Blob: ", True))
                     if not blob_names:
-                        break
+                        bucket_name = None
+                        self.pop()
+                        self.pop()
+                        continue
                     self.pop()
                     for blob_name in blob_names:
                         bucket = storage_client.bucket(bucket_name)

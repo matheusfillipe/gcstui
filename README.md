@@ -16,6 +16,8 @@ Run `gstui` or `gstui --help` to see more options.
 
 Loading buckets or the inital listing for the first time can take a long time to cache. You can create an initial cache of everything with: `gstui -a`.
 
+The first picker is for selecting the bucket and the second is for selecting the blob to download.
+
 # Development
 
 Be free to submit a PR. Check the formatting with flake8 and for new features try to write tests.
