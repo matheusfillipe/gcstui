@@ -39,6 +39,7 @@ jobs:
           echo "$HOME/.local/bin" >> $GITHUB_PATH
       - name: Install dependencies
         run: |
+          sudo apt install fzf
           poetry install
       - name: Test Build
         run: |
@@ -47,7 +48,7 @@ jobs:
         run: |
           poetry run tests
       - name: Deploy to PyPI
-        if: startsWith(github.ref, 'refs/tags/v') && github.ref == 'refs/heads/main'
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: JRubics/poetry-publish@v1.13
         with:
           user: mattfly
