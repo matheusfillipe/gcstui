@@ -10,6 +10,8 @@ A Text User Interface for exploring Google Cloud Storage. Fast and cached.
 pip install -U gstui
 ```
 
+Install [fzf](https://github.com/junegunn/fzf#installation)
+
 ## Usage
 
 Run `gstui` or `gstui --help` to see more options.

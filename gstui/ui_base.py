@@ -79,7 +79,8 @@ class FzfUI(UIBase):
                     self.pop()
                     for blob_name in blob_names:
                         bucket = storage_client.bucket(bucket_name)
-                        blob = bucket.blob(blob_name)
-                        storage_client.download(blob, Path(blob_name).name)
+                        blob = bucket.get_blob(blob_name)
+                        if blob:
+                            storage_client.download(blob, Path(blob_name).name)
             except KeyboardInterrupt:
                 return
