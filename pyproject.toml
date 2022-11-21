@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gstui"
-version = "0.1.3"
+version = "0.1.4"
 description = "Text User interface for exploring, downloading and uploading files to Google Cloud Storage buckets"
 authors = ["Matheus Fillipe <matheusfillipeag@gmail.com>"]
 license = "MIT"
