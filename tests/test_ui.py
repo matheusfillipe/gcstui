@@ -40,6 +40,7 @@ def test_fzf_ui(cached_client: CachedClient):
     test_fzf_ui = FzfUI(fzf)
     assert_stack_ui(test_fzf_ui)
 
+    cached_client.bucket = Mock(return_value=Mock())
     cached_client.list_buckets = Mock(return_value=[mock_blob_name, "other"])
     cached_client.list_blobs = Mock(return_value=[mock_blob_name])
 
